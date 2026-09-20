@@ -2,6 +2,15 @@
 
 **Status:** `SHADOW_ONLY` · not ratified · not deployed · imported by nothing.
 
+```
+R-ONLY POLICY STUDY
+NOT ACCOUNT-BASED
+NOT EQUITY-BASED
+NOT BROKER-RECONCILED
+NOT A PERFORMANCE FORECAST
+NOT AN IMPLEMENTED RST CONTROL
+```
+
 This repository holds a versioned declaration of two trade-management policies
 and the state vocabulary a policy study may use, plus pure validation over them.
 It does not execute, observe, or change anything.
@@ -54,6 +63,21 @@ over that data.
 Phase C is R-multiple only. `initialRiskPct` is `null` by construction and
 `netModelR` is permanently unavailable in this phase — recorded as a stated
 reason, never as a zero.
+
+**On the 8R figure.** Where the blueprint's 20-trade distribution totals +8R, that
+is an **8R planning illustration** derived from an assumed distribution — 8 stops,
+6 breakeven, 4 TP2-locked, 2 TP3 — that has never been measured. It converts to
+"approximately 8%" only under an assumed 1%-per-R account-risk conversion that
+this repository does not implement and cannot evaluate.
+
+It is not a live-performance forecast, a broker-return claim, a guarantee, or an
+automatic shutdown threshold.
+
+**Account-level risk admission is out of scope here.** The RST Secure-threshold
+control is a Phase F requirement depending on broker-authoritative account,
+order, fill, position, cost, and executable-stop truth. None of that exists
+today. `stopProtectionState` and `stopMoveActuallyApplied` are **model-side
+evidence only** and must never be represented as broker-confirmed protection.
 
 ---
 
