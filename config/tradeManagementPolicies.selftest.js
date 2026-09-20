@@ -220,6 +220,47 @@ section('7b. Terminal evidence must be exact, not generic');
 }
 
 /* ═══════════════════════════════════════════════════════════════════ */
+section('7c. The frozen baseline cannot be rewritten into a cleaner policy');
+
+{
+  const bad = clone(BASE);
+  bad.stopTransitions.atTp2 = { to: 'tp1', conditional: false, trigger: 'tp2_milestone' };
+  bad.stopTransitions.postTp2Transitions = [];
+  check('refuses a baseline claiming an unconditional TP2 milestone lock',
+    has(P.validatePolicy(bad), 'E_BASELINE_TP2_MILESTONE_SEMANTICS'),
+    'structurally valid, historically false');
+}
+{
+  const bad = clone(BASE); bad.stopTransitions.postTp2Transitions = [];
+  check('refuses a baseline with the A5 P1 rule removed',
+    has(P.validatePolicy(bad), 'E_BASELINE_A5_P1_RULE_COUNT'));
+}
+{
+  const bad = clone(BASE);
+  bad.stopTransitions.postTp2Transitions[0].condition = 'bias_flip_actionable';
+  check('refuses a baseline that drops post_tp2_runner from the condition',
+    has(P.validatePolicy(bad), 'E_BASELINE_A5_P1_SEMANTICS'),
+    'the real condition is both clauses');
+}
+{
+  const bad = clone(BASE);
+  bad.stopTransitions.postTp2Transitions[0].conditional = false;
+  check('refuses a baseline that makes the A5 P1 rule unconditional',
+    has(P.validatePolicy(bad), 'E_BASELINE_A5_P1_SEMANTICS'));
+}
+{
+  const bad = clone(BASE);
+  delete bad.standardTerminals[P.STATES.CLOSED_TP1_LOCKED].requiredConditionEvidence;
+  check('refuses a baseline TP1-lock that drops its condition evidence',
+    has(P.validatePolicy(bad), 'E_BASELINE_TP1_LOCK_EVIDENCE'));
+}
+{
+  // the pin is scoped: the same shape is legitimate for the intervention
+  check('the staged policy is NOT subject to the baseline pin',
+    P.validatePolicy(STAGED).valid === true);
+}
+
+/* ═══════════════════════════════════════════════════════════════════ */
 section('8. Malformed input fails closed');
 
 {
@@ -258,6 +299,13 @@ section('9. Governance facts are carried, not remembered');
     && Object.isFrozen(BASE.stopTransitions.postTp2Transitions));
   check('cohort boundary is scoped to the first study, not to the policy',
     typeof P.FIRST_STUDY_COHORT_EARLIEST_ELIGIBLE_ISO === 'string');
+  check('transition conditions are named constants, not repeated literals',
+    P.TRANSITION_CONDITIONS.BIAS_FLIP_ACTIONABLE_POST_TP2_RUNNER
+      === 'bias_flip_actionable && post_tp2_runner');
+  check('the baseline carries its source provenance',
+    BASE.frozenFromSource.indexJsSha256
+      === '9a4863e1472ca0dca67f42c9f595e12eb4c0c7f3b54fb2de99e79262cd8e5571'
+    && BASE.frozenFromSource.sites.length === 4);
   check('stop failure is not a payoff path',
     P.STOP_FAILURE_TREATMENT.addToStandardPayoffTable === false
     && P.STOP_FAILURE_TREATMENT.policyOutcome === P.STATES.POLICY_STATE_AMBIGUOUS);
