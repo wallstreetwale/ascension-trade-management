@@ -8,7 +8,17 @@ It does not execute, observe, or change anything.
 
 ```
 node config/tradeManagementPolicies.selftest.js     →  84 checks, 0 failed
+
+sha256sum config/*.js
+cff42c11276bf9df157e0244d59e9f452538582dc0531d2c8f0cc7f042898502  tradeManagementPolicies.js
+e004569f2c95eec8f70f4c191871b2762e64efd646cdd4a4a5e71320147a2806  tradeManagementPolicies.selftest.js
 ```
+
+**Check the hashes, not the check count.** An earlier generation of these files
+runs cleanly and reports **76 passed, 0 failed** — no error, no warning, nothing
+to notice. It is missing section 7c, the frozen-baseline pin, which is the
+control that refuses a baseline rewritten into a cleaner policy. A passing run
+is not evidence you have the right file.
 
 ---
 
