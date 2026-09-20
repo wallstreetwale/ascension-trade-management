@@ -98,14 +98,18 @@ const EXCEPTION_CLASS_DESCRIPTIONS = Object.freeze({
 });
 
 /* ── Stop-transition evidence ────────────────────────────────────────────────────────────────
-   Three-valued by contract. `stopMoveActuallyApplied` in the Scanner is MOVE-GENERIC: it is set
+   `stopMoveActuallyApplied` in the Scanner is MOVE-GENERIC: it is set
    by any successful applyStopMove, so a Rule A trail sets it identically to a TP1 breakeven.
    `stopProtectionState === 'BREAKEVEN'` is the usable fact for the breakeven path.
 
    PROFIT_PROTECTED does NOT identify the TP1-locked state — it covers any stop beyond entry,
    including a Rule A trail. Classifying CLOSED_TP1_LOCKED requires comparing stopLoss against
    tpsl.tp1, not the protection state alone. */
-/* A single NOT_APPLIED would collapse materially different cases: never attempted, attempted
+/* Scanner source facts are three-valued where the shared contract requires it: true / false /
+   unknown. This policy-study taxonomy REFINES the evidence needed to classify a specific stop
+   transition; it does not replace or collapse those source facts.
+
+   A single NOT_APPLIED would collapse materially different cases: never attempted, attempted
    and refused by the monotonic guard, mutated but not persisted, persisted but not restored.
    Each has a different meaning for custody and a different remedy. */
 const STOP_TRANSITION_EVIDENCE = Object.freeze({
@@ -121,6 +125,12 @@ const STOP_TRANSITION_EVIDENCE = Object.freeze({
 
   UNKNOWN: 'unknown',
   CONTRADICTORY: 'contradictory',
+});
+
+/* Conditions are named constants, not repeated string literals. A condition that appears
+   twice as a literal can drift in one place and not the other, and the drift is invisible. */
+const TRANSITION_CONDITIONS = Object.freeze({
+  BIAS_FLIP_ACTIONABLE_POST_TP2_RUNNER: 'bias_flip_actionable && post_tp2_runner',
 });
 
 /* Only the exact transition supports the payoff. `stopMoveActuallyApplied` in the Scanner is
@@ -194,6 +204,17 @@ const ASCENSION_MODEL_1PCT_25_50_25_V1 = {
 const BASELINE_MODEL_STOPS_ONLY_FLIP_CONDITIONAL_TP2_LOCK_V1 = {
   policyId: 'BASELINE_MODEL_STOPS_ONLY_FLIP_CONDITIONAL_TP2_LOCK_V1',
   policySchemaVersion: POLICY_SCHEMA_VERSION,
+
+  /* This object mirrors deployed source. It is not a design; it is a record of observed
+     behaviour, and it may only change when the source it mirrors changes. */
+  frozenFromSource: {
+    baselineId: 'SCANNER_BASELINE_2026-09-18_idx9a4863e1',
+    indexJsSha256: '9a4863e1472ca0dca67f42c9f595e12eb4c0c7f3b54fb2de99e79262cd8e5571',
+    observedAt: '2026-09-18',
+    sites: ['index.js:711 applyTp1Mutation', 'index.js:747 applyTp2Mutation',
+            'index.js:4609 A5 P1 branch', 'index.js:4630 applyStopMove a5p1_secure_tp1'],
+  },
+
   mode: 'SHADOW_ONLY',
 
   resultLayer: 'scanner_model',
@@ -216,7 +237,7 @@ const BASELINE_MODEL_STOPS_ONLY_FLIP_CONDITIONAL_TP2_LOCK_V1 = {
     atTp2: { to: null, conditional: false, trigger: 'tp2_milestone' },
     postTp2Transitions: [
       { to: 'tp1', conditional: true,
-        condition: 'bias_flip_actionable && post_tp2_runner',
+        condition: TRANSITION_CONDITIONS.BIAS_FLIP_ACTIONABLE_POST_TP2_RUNNER,
         trigger: 'a5_p1' },
     ],
   },
@@ -227,7 +248,7 @@ const BASELINE_MODEL_STOPS_ONLY_FLIP_CONDITIONAL_TP2_LOCK_V1 = {
       requiredStopTransitionEvidence: 'tp1_breakeven_established' },
     [STATES.CLOSED_TP1_LOCKED]:   { grossModelR: +1.00,
       requiredStopTransitionEvidence: 'tp2_tp1_lock_established',
-      requiredConditionEvidence: 'bias_flip_actionable && post_tp2_runner' },
+      requiredConditionEvidence: TRANSITION_CONDITIONS.BIAS_FLIP_ACTIONABLE_POST_TP2_RUNNER },
     [STATES.CLOSED_TP3]:          { grossModelR: +6.00, requiredStopTransitionEvidence: null },
   },
 
@@ -428,6 +449,47 @@ function validatePolicy(policy) {
     }
   }
 
+  /* ── Frozen-baseline semantics ────────────────────────────────────────────────────────────
+     The generic checks above accept any structurally valid policy. They would also accept a
+     baseline rewritten to say `atTp2: { to: 'tp1' }` — structurally fine, historically false,
+     and exactly the drift H7/H1 existed to prevent: a cleaner representation quietly replacing
+     what deployed source does. This block pins the one object that is a record rather than a
+     design. */
+  if (policy.policyId === BASELINE_MODEL_STOPS_ONLY_FLIP_CONDITIONAL_TP2_LOCK_V1.policyId) {
+    const st2 = policy.stopTransitions || {};
+    const atTp2 = st2.atTp2;
+    const post = st2.postTp2Transitions;
+    const locked = (policy.standardTerminals || {})[STATES.CLOSED_TP1_LOCKED];
+
+    if (!atTp2 || atTp2.to !== null || atTp2.conditional !== false
+        || atTp2.trigger !== 'tp2_milestone') {
+      E('E_BASELINE_TP2_MILESTONE_SEMANTICS', 'stopTransitions.atTp2',
+        'The frozen deployed baseline records TP2 and does not move the stop at that milestone. '
+        + 'applyTp2Mutation contains no applyStopMove call (index.js:747).');
+    }
+
+    if (!Array.isArray(post) || post.length !== 1) {
+      E('E_BASELINE_A5_P1_RULE_COUNT', 'stopTransitions.postTp2Transitions',
+        'The frozen deployed baseline has exactly one post-TP2 transition: the A5 P1 rule.');
+    } else {
+      const a5 = post[0] || {};
+      if (a5.to !== 'tp1' || a5.conditional !== true || a5.trigger !== 'a5_p1'
+          || a5.condition !== TRANSITION_CONDITIONS.BIAS_FLIP_ACTIONABLE_POST_TP2_RUNNER) {
+        E('E_BASELINE_A5_P1_SEMANTICS', 'stopTransitions.postTp2Transitions[0]',
+          'The A5 P1 transition must match deployed source: to tp1, conditional on '
+          + '`_flipActionable && postTP2Runner` (index.js:4609), applied at index.js:4630.');
+      }
+    }
+
+    if (!locked
+        || locked.requiredStopTransitionEvidence !== STOP_TRANSITION_EVIDENCE.TP2_TP1_LOCK_ESTABLISHED
+        || locked.requiredConditionEvidence !== TRANSITION_CONDITIONS.BIAS_FLIP_ACTIONABLE_POST_TP2_RUNNER) {
+      E('E_BASELINE_TP1_LOCK_EVIDENCE', `standardTerminals.${STATES.CLOSED_TP1_LOCKED}`,
+        'The baseline TP1-locked outcome requires both the exact TP2-to-TP1 transition evidence '
+        + 'and the A5 P1 condition evidence. Without the flip, the terminal is CLOSED_BREAKEVEN.');
+    }
+  }
+
   return { policyId: policy.policyId || null, valid: errors.length === 0, errors };
 }
 
@@ -468,6 +530,7 @@ module.exports = Object.freeze({
   EXCEPTION_CLASSES,
   EXCEPTION_CLASS_DESCRIPTIONS,
   STOP_TRANSITION_EVIDENCE,
+  TRANSITION_CONDITIONS,
   TERMINAL_EVIDENCE_REQUIREMENT,
   deepFreeze,
   STOP_FAILURE_TREATMENT,
