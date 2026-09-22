@@ -1,0 +1,27 @@
+{
+ "artifactCount": 11,
+ "bundleId": "BUNDLE_02_TRADE_MANAGEMENT_DOCUMENTATION",
+ "classification": "DOCUMENTATION_AND_GOVERNANCE_ONLY",
+ "files": {
+  "README.md": "8081cfff1afc1f4f7d3b619e6c493b52c8428b0d822ca2f187dbe130cef49902",
+  "docs/EXTERNAL_REVIEW_REQUEST_TrackH_2026-09-18.md": "c1818ba72133f2c2c2482a584bb6f845f096c83712f5c336249b9b897cb5b9d2",
+  "docs/H2_ELIGIBLE_COHORT_2026-09-18.md": "4c07c5fe6a8283402881b34f7514302473b795a1d5207cd138ca5ec2e7ff95aa",
+  "docs/H7_H1_BASELINE_MAP_2026-09-18.md": "65b87c5e6c946ad3ea00bc2b0358a46e2b094e483dfc4b43a7e6e2e690e50f55",
+  "docs/H7_H1_SOURCE_READING_WORKSHEET.md": "58c380fa52c92c74aa9dc5dec008b28ab602165115796f321beb60e2db806582",
+  "docs/RESPONSE_TO_EXTERNAL_REVIEW_TrackH_2026-09-18.md": "7080827950e2be246191d420466471f8a1c6fa65287f78f0244da8faa3925e1e",
+  "docs/TRACK_H_SCOPE_RESET_2026-09-18.md": "6c78a9ac0a4c266ab969d63f0662d50b4374feb2795a7d4fa712b39ae6ee692d",
+  "docs/TRADE_MANAGEMENT_BLUEPRINT_REVIEW_2026-09-18.md": "6f963603868233c6464c483b4fe9c06bb33eec79bc3d76a57630eccf965d547d",
+  "docs/TRADE_MANAGEMENT_POLICY_STUDY_INTEGRATION_2026-09-18.md": "c39048527cafa979d8ba9c639284d810436dafdc0c6514256ba637f373784f2f",
+  "docs/phase-f/RST_DESIGN_ASSESSMENT_2026-09-20.md": "282204c8fae704bc652f79963d6fc5e8b1aa73df61749ff059393c008c80592f",
+  "verify_filing.py": "1cd678510fcec491ce42da0683113910827c1285facface1d7a53be58ff1e6be"
+ },
+ "generatedAtUtc": "2026-09-21T23:25:45+00:00",
+ "generatorVersion": "build_kit 2026-09-20",
+ "manifestSchemaVersion": 1,
+ "operationalEffect": "NONE",
+ "repository": "ascension-trade-management",
+ "selfReferentialHashes": "bundleSha256 and manifestSha256 cannot be recorded inside the files they describe. Both are published in FILING_INSTRUCTIONS_2026-09-20.md, outside every bundle.",
+ "sensitivity": "INTERNAL",
+ "verifierSha256": "1cd678510fcec491ce42da0683113910827c1285facface1d7a53be58ff1e6be",
+ "verifierSha256Note": "Only the full 64-character verifierSha256 is authoritative. No truncated hash anywhere in this file or its report identifies the verifier."
+}

@@ -2,6 +2,15 @@
 
 **Status:** `SHADOW_ONLY` · not ratified · not deployed · imported by nothing.
 
+```
+R-ONLY POLICY STUDY
+NOT ACCOUNT-BASED
+NOT EQUITY-BASED
+NOT BROKER-RECONCILED
+NOT A PERFORMANCE FORECAST
+NOT AN IMPLEMENTED RST CONTROL
+```
+
 This repository holds a versioned declaration of two trade-management policies
 and the state vocabulary a policy study may use, plus pure validation over them.
 It does not execute, observe, or change anything.
@@ -48,19 +57,38 @@ not an autonomous agent       not a source of any performance claim
 
 The module contains **zero `require()` calls**. It imports nothing, references
 no `entryLatch`, calls no lifecycle function, and every export is deeply frozen.
-It cannot affect anything, because there is nothing in it but data and functions
-over that data.
+In its current repository state, this module is not imported by any deployed
+component and contains only data plus pure functions over that data. **It has no
+direct operational effect unless a separately governed change imports or consumes
+it in an executable system.**
 
 Phase C is R-multiple only. `initialRiskPct` is `null` by construction and
 `netModelR` is permanently unavailable in this phase — recorded as a stated
 reason, never as a zero.
 
+**On the 8R figure.** Where the blueprint's 20-trade distribution totals +8R, that
+is an **8R planning illustration** derived from an assumed distribution — 8 stops,
+6 breakeven, 4 TP2-locked, 2 TP3 — that has never been measured. It converts to
+"approximately 8%" only under an assumed 1%-per-R account-risk conversion that
+this repository does not implement and cannot evaluate.
+
+It is not a live-performance forecast, a broker-return claim, a guarantee, or an
+automatic shutdown threshold.
+
+**Account-level risk admission is out of scope here.** The RST Secure-threshold
+control is a Phase F requirement depending on broker-authoritative account,
+order, fill, position, cost, and executable-stop truth. None of that exists
+today. `stopProtectionState` and `stopMoveActuallyApplied` are **model-side
+evidence only** and must never be represented as broker-confirmed protection.
+
 ---
 
 ## The baseline is a record, not a design
 
-`BASELINE_MODEL_STOPS_ONLY_FLIP_CONDITIONAL_TP2_LOCK_V1` mirrors deployed
-Scanner source read on 2026-09-18:
+`BASELINE_MODEL_STOPS_ONLY_FLIP_CONDITIONAL_TP2_LOCK_V1` mirrors the identified
+deployed Scanner artifact source read on 2026-09-18, at the hash below. This
+establishes artifact contents at that observation point; it does not establish
+later runtime behaviour, active deployment correspondence, or broker execution:
 
 ```
 index.js  9a4863e1472ca0dca67f42c9f595e12eb4c0c7f3b54fb2de99e79262cd8e5571
@@ -83,8 +111,10 @@ accepted. An earlier draft of this file made exactly that mistake, and
 
 ## Why it lives here and not in the Scanner repo
 
-`config/` eventually belongs in the Scanner repository at the same relative
-path, so the move is a straight copy with no import rewrites.
+`config/` is intended to move eventually into the Scanner repository at the same
+relative path. **Any such move remains a governed Scanner change** requiring a
+RULE-01 record, consumer and import review, testing, deployment control, and
+renewed deployed-artifact identity.
 
 It is here because:
 
@@ -171,4 +201,16 @@ no performance claim exists or is sought
 Scanner-model evidence is not broker-reconciled performance
 the null hypothesis is admissible — a clean rejection is a successful result
 this configuration may not be deployed without a RULE-01 record
+```
+
+---
+
+## Document status
+
+```
+Document      repository README for the current pure policy-configuration artifact
+Claims        describes current repository content and source-derived baseline
+              semantics
+NOT           a deployment attestation · a policy-promotion decision · a broker
+              execution record · an authorization · a performance report
 ```
